@@ -33,7 +33,7 @@ runs:
         tar -xzf install-tl-unx.tar.gz
         cd install-tl-20* || exit 1
         ./install-tl --portable --profile="$TEXLIVE_PROFILE_PATH"
-        echo "$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux" >> $GITHUB_PATH
+        echo "$TEXLIVE_INSTALL_PREFIX/bin/$(ls $TEXLIVE_INSTALL_PREFIX/bin)" >> $GITHUB_PATH
     - name: Install TeX Live packages
       if: steps.cache-texlive.outputs.cache-hit != 'true'
       env:
@@ -49,7 +49,7 @@ runs:
         TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
       shell: bash
       run: |
-        PATH=$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux:$PATH
+        PATH=$TEXLIVE_INSTALL_PREFIX/bin/$(ls $TEXLIVE_INSTALL_PREFIX/bin):$PATH
         tlmgr update --self
         tlmgr update --all
-        echo "$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux" >> $GITHUB_PATH
+        echo "$TEXLIVE_INSTALL_PREFIX/bin/$(ls $TEXLIVE_INSTALL_PREFIX/bin)" >> $GITHUB_PATH
