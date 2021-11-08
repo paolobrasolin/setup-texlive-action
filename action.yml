@@ -40,7 +40,7 @@ runs:
         TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
       shell: bash
       run: |
-        readarray -t TEXLIVE_PACKAGES < <(grep -v '^#' "$TEXLIVE_PACKAGES_PATH")
+        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep -v '^$' "$TEXLIVE_PACKAGES_PATH")
         tlmgr install "${TEXLIVE_PACKAGES[@]}"
 
     - name: Update TeX Live distribution
