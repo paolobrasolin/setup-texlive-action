@@ -4,15 +4,16 @@ inputs:
   cache-key:
     default: 'texlive'
   packages-path:
-    default: ${{ github.action_path }}/texlive.packages
+    default: ${{ github.action_path }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.packages 
   profile-path:
-    default: ${{ github.action_path }}/texlive.profile
+    default: ${{ github.action_path }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.profile 
   installation-path:
-    default: ${{ runner.tool_cache }}/texlive
+    default: ${{ runner.tool_cache }}${{ runner.os == 'Windows' && '\' || '/'}}texlive
 outputs: {}
 runs:
   using: "composite"
   steps:
+
     - name: Cache TeX Live installation
       uses: actions/cache@v2
       id: cache-texlive
@@ -21,35 +22,76 @@ runs:
         key: ${{ inputs.cache-key }}-${{ hashFiles(inputs.profile-path, inputs.packages-path) }}
         restore-keys: ${{ inputs.cache-key }}-
 
-    - name: Install TeX Live distribution
-      if: steps.cache-texlive.outputs.cache-hit != 'true'
+    - name: Install TeX Live distribution (Windows)
+      if: runner.os == 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
+      env:
+        TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
+        TEXLIVE_PROFILE_PATH: ${{ inputs.profile-path }}
+      shell: powershell
+      run: |
+        Set-Location -Path ${{ runner.temp }}
+        Invoke-WebRequest http://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip -OutFile install-tl.zip
+        Expand-Archive -Path install-tl.zip -DestinationPath .
+        Set-Location -Path install-tl-20*
+        .\install-tl-windows.bat --portable --profile="${env:TEXLIVE_PROFILE_PATH}"
+    - name: Install TeX Live distribution (Linux or macOS)
+      if: runner.os != 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
       env:
         TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
         TEXLIVE_PROFILE_PATH: ${{ inputs.profile-path }}
       shell: bash
       run: |
         cd ${{ runner.temp }}
-        wget -q http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+        wget --quiet http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
         tar -xzf install-tl-unx.tar.gz
-        cd install-tl-20* || exit 1
+        cd install-tl-20*
         ./install-tl --portable --profile="$TEXLIVE_PROFILE_PATH"
-        echo "$TEXLIVE_INSTALL_PREFIX/bin/$(ls $TEXLIVE_INSTALL_PREFIX/bin)" >> $GITHUB_PATH
-    - name: Install TeX Live packages
-      if: steps.cache-texlive.outputs.cache-hit != 'true'
-      env:
-        TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
-      shell: bash
-      run: |
-        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep -v '^$' "$TEXLIVE_PACKAGES_PATH")
-        tlmgr install "${TEXLIVE_PACKAGES[@]}"
 
-    - name: Update TeX Live distribution
-      if: steps.cache-texlive.outputs.cache-hit == 'true'
+    - name: Update system paths (Windows)
+      if: runner.os == 'Windows'
+      env:
+        TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
+      shell: powershell
+      run: |
+        $TLMGR_PATH = Get-ChildItem -Path "${env:TEXLIVE_INSTALL_PREFIX}\bin\*\tlmgr.bat"
+        $PLATFORM = Invoke-Expression "$TLMGR_PATH -print-platform"
+        Write-Output "${env:TEXLIVE_INSTALL_PREFIX}\bin\${PLATFORM}" | Out-File -FilePath ${env:GITHUB_PATH} -Encoding utf8 -Append
+    - name: Update system paths (Linux or macOS)
+      if: runner.os != 'Windows'
       env:
         TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
       shell: bash
       run: |
-        PATH=$TEXLIVE_INSTALL_PREFIX/bin/$(ls $TEXLIVE_INSTALL_PREFIX/bin):$PATH
+        TLMGR_PATH=$(ls "$TEXLIVE_INSTALL_PREFIX"/bin/*/tlmgr)
+        PLATFORM=$($TLMGR_PATH -print-platform)
+        echo "$TEXLIVE_INSTALL_PREFIX/bin/$PLATFORM" >> $GITHUB_PATH
+
+    - name: Install TeX Live packages (Windows)
+      if: runner.os == 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
+      env:
+        TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
+      shell: powershell
+      run: |
+        [array] $TEXLIVE_PACKAGES = (Select-String -Pattern '^$' -NotMatch ${env:TEXLIVE_PACKAGES_PATH}).Line
+        tlmgr install $($TEXLIVE_PACKAGES -join " ")
+    - name: Install TeX Live packages (Linux or macOS)
+      if: runner.os != 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
+      env:
+        TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
+      shell: bash
+      run: |
+        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep --invert-match '^$' "$TEXLIVE_PACKAGES_PATH")
+        tlmgr install "${TEXLIVE_PACKAGES[@]}"
+
+    - name: Update TeX Live distribution (Windows)
+      if: runner.os == 'Windows' && steps.cache-texlive.outputs.cache-hit == 'true'
+      shell: powershell
+      run: |
         tlmgr update --self
         tlmgr update --all
-        echo "$TEXLIVE_INSTALL_PREFIX/bin/$(ls $TEXLIVE_INSTALL_PREFIX/bin)" >> $GITHUB_PATH
+    - name: Update TeX Live distribution (Linux and macOS)
+      if: runner.os != 'Windows' && steps.cache-texlive.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        tlmgr update --self
+        tlmgr update --all

@@ -19,34 +19,37 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Open tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+      # - name: Open tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   # if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
       - uses: ./
         with:
           cache-key: texlive-${{ github.job_id }}-${{ matrix.os }}
-          packages-path: ${{ github.workspace }}/texlive.packages
-          profile-path: ${{ github.workspace }}/texlive.profile
+          # packages-path: ${{ github.workspace }}/texlive.packages
+          # profile-path: ${{ github.workspace }}/texlive.profile
+          packages-path: ${{ github.workspace }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.packages 
+          profile-path: ${{ github.workspace }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.profile 
       - name: Test tlmgr availability
         run: tlmgr version
-  minimal:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ 'ubuntu-latest', 'macos-latest' ]
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Open tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
-      - uses: ./
-        with:
-          cache-key: texlive-${{ github.job_id }}-${{ matrix.os }}
-          packages-path: ${{ github.workspace }}/.github/texlive.packages
-          profile-path: ${{ github.workspace }}/.github/texlive.profile
-      - name: Test run for latex
-        run: latex small2e
-      - name: Test run from pdflatex
-        run: pdflatex sample2e
+  # minimal:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # os: [ 'ubuntu-latest', 'macos-latest' ]
+  #       os: []
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2
+  #     - name: Open tmate session
+  #       uses: mxschmitt/action-tmate@v3
+  #       if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+  #     - uses: ./
+  #       with:
+  #         cache-key: texlive-${{ github.job_id }}-${{ matrix.os }}
+  #         packages-path: ${{ github.workspace }}/.github/texlive.packages
+  #         profile-path: ${{ github.workspace }}/.github/texlive.profile
+  #     - name: Test run for latex
+  #       run: latex small2e
+  #     - name: Test run from pdflatex
+  #       run: pdflatex sample2e
