@@ -3,36 +3,35 @@ on:
   push:
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch:
-    inputs:
-      debug_enabled:
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
-        required: false
-        default: false
 jobs:
-  defaults:
-    runs-on: ubuntu-latest
+  infraonly:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest' ]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
       - uses: ./
         with:
-          cache-key: texlive-${{ github.job_id }}
+          cache-key: texlive-${{ github.job_id }}-${{ matrix.os }}
           packages-path: ${{ github.workspace }}/texlive.packages
           profile-path: ${{ github.workspace }}/texlive.profile
       - name: Test tlmgr availability
         run: tlmgr version
-  custom:
-    runs-on: ubuntu-latest
+  minimal:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest' ]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
       - uses: ./
         with:
-          cache-key: texlive-${{ github.job_id }}
+          cache-key: texlive-${{ github.job_id }}-${{ matrix.os }}
           packages-path: ${{ github.workspace }}/.github/texlive.packages
           profile-path: ${{ github.workspace }}/.github/texlive.profile
       - name: Test run for latex
