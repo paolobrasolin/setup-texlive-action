@@ -4,22 +4,28 @@ inputs:
   cache-key:
     required: false
     default: 'texlive'
+  packages-path:
+    default: ${{ github.workspace }}/.github/texlive.packages
+  profile-path:
+    default: ${{ github.workspace }}/.github/texlive.profile
+  installation-path:
+    default: ${{ runner.tool_cache }}/texlive
 outputs: {}
 runs:
   using: "composite"
   steps:
-    - name: Cache TeXLive distribution
+    - name: Cache TeX Live distribution
       uses: actions/cache@v2
       id: cache-texlive
       with:
-        path: ${{ runner.tool_cache }}/texlive
-        key: ${{ inputs.cache-key }}-${{ hashFiles('.github/texlive.*') }}
-        #restore-keys: ${{ inputs.cache-key }}-
+        path: ${{ inputs.installation-path }}
+        key: ${{ inputs.cache-key }}-${{ hashFiles(inputs.profile-path, inputs.packages-path) }}
+        restore-keys: ${{ inputs.cache-key }}-
     - name: Install TeXLive (infraonly)
       if: steps.cache-texlive.outputs.cache-hit != 'true'
       env:
-        TEXLIVE_INSTALL_PREFIX: ${{ runner.tool_cache }}/texlive
-        TEXLIVE_PROFILE_PATH: ${{ github.workspace }}/.github/texlive.profile
+        TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
+        TEXLIVE_PROFILE_PATH: ${{ inputs.profile-path }}
       shell: bash
       run: |
         cd ${{ runner.temp }}
@@ -31,7 +37,7 @@ runs:
     - name: Install TeXLive packages
       if: steps.cache-texlive.outputs.cache-hit != 'true'
       env:
-        TEXLIVE_PACKAGES_PATH: ${{ github.workspace }}/.github/texlive.packages
+        TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
       shell: bash
       run: |
         readarray -t TEXLIVE_PACKAGES < <(grep -v '^#' "$TEXLIVE_PACKAGES_PATH")
@@ -39,8 +45,7 @@ runs:
     - name: Update TeXLive distribution
       if: steps.cache-texlive.outputs.cache-hit == 'true'
       env:
-        TEXLIVE_INSTALL_PREFIX: ${{ runner.tool_cache }}/texlive
-        TEXLIVE_PROFILE_PATH: ${{ github.workspace }}/.github/texlive.profile
+        TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
       shell: bash
       run: |
         PATH=$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux:$PATH
