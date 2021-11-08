@@ -1,8 +1,8 @@
 # Reference: https://www.tug.org/texlive/doc/install-tl.html#PROFILES
 
 #=[ Scheme ]====================================================================
-#selected_scheme scheme-infraonly
-selected_scheme scheme-minimal
+selected_scheme scheme-infraonly
+#selected_scheme scheme-minimal
 
 #=[ Collections ]===============================================================
 # No collections.

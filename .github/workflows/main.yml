@@ -10,3 +10,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
       - uses: ./
+      - name: Test run for latex
+        run: latex small2e
+      - name: Test run from pdflatex
+        run: pdflatex sample2e
