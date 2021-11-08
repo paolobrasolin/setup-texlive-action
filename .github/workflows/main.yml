@@ -3,13 +3,38 @@ on:
   push:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        required: false
+        default: false
 jobs:
-  main:
+  defaults:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+      - uses: ./
+        with:
+          cache-key: texlive-${{ github.job_id }}
+          packages-path: ${{ github.workspace }}/texlive.packages
+          profile-path: ${{ github.workspace }}/texlive.profile
+      - name: Test tlmgr availability
+        run: tlmgr version
+  custom:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
       - uses: ./
+        with:
+          cache-key: texlive-${{ github.job_id }}
+          packages-path: ${{ github.workspace }}/.github/texlive.packages
+          profile-path: ${{ github.workspace }}/.github/texlive.profile
       - name: Test run for latex
         run: latex small2e
       - name: Test run from pdflatex
