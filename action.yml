@@ -1,0 +1,49 @@
+name: 'Setup TeX Live'
+description: 'GHA action to setup TeX Live'
+inputs:
+  cache-key:
+    required: false
+    default: 'texlive'
+outputs: {}
+runs:
+  using: "composite"
+  steps:
+    - name: Cache TeXLive distribution
+      uses: actions/cache@v2
+      id: cache-texlive
+      with:
+        path: ${{ runner.tool_cache }}/texlive
+        key: ${{ inputs.cache-key }}-${{ hashFiles('.github/texlive.*') }}
+        restore-keys: ${{ inputs.cache-key }}-
+    - name: Install TeXLive (infraonly)
+      if: steps.cache-texlive.outputs.cache-hit != 'true'
+      env:
+        TEXLIVE_INSTALL_PREFIX: ${{ runner.tool_cache }}/texlive
+        TEXLIVE_PROFILE_PATH: ${{ github.workspace }}/.github/texlive.profile
+      shell: bash
+      run: |
+        cd ${{ runner.temp }}
+        wget -q http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+        tar -xzf install-tl-unx.tar.gz
+        cd install-tl-20* || exit 1
+        ./install-tl --portable --profile="$TEXLIVE_PROFILE_PATH"
+        echo "$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux" >> $GITHUB_PATH
+    - name: Install TeXLive packages
+      if: steps.cache-texlive.outputs.cache-hit != 'true'
+      env:
+        TEXLIVE_PACKAGES_PATH: ${{ github.workspace }}/.github/texlive.packages
+      shell: bash
+      run: |
+        readarray -t TEXLIVE_PACKAGES < <(grep -v '^#' "$TEXLIVE_PACKAGES_PATH")
+        tlmgr install "${TEXLIVE_PACKAGES[@]}"
+    - name: Update TeXLive distribution
+      if: steps.cache-texlive.outputs.cache-hit == 'true'
+      env:
+        TEXLIVE_INSTALL_PREFIX: ${{ runner.tool_cache }}/texlive
+        TEXLIVE_PROFILE_PATH: ${{ github.workspace }}/.github/texlive.profile
+      shell: bash
+      run: |
+        PATH=$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux:$PATH
+        tlmgr update --self
+        tlmgr update --all
+        echo "$TEXLIVE_INSTALL_PREFIX/bin/x86_64-linux" >> $GITHUB_PATH
