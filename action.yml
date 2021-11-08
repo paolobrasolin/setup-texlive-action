@@ -14,7 +14,7 @@ runs:
       with:
         path: ${{ runner.tool_cache }}/texlive
         key: ${{ inputs.cache-key }}-${{ hashFiles('.github/texlive.*') }}
-        restore-keys: ${{ inputs.cache-key }}-
+        #restore-keys: ${{ inputs.cache-key }}-
     - name: Install TeXLive (infraonly)
       if: steps.cache-texlive.outputs.cache-hit != 'true'
       env:
