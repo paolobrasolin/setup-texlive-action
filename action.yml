@@ -1,6 +1,8 @@
 name: 'Setup TeX Live'
 description: 'GHA action to setup TeX Live'
 inputs:
+  cache-enabled:
+    default: true
   cache-key:
     default: 'texlive'
   packages-path:
@@ -17,6 +19,7 @@ runs:
     - name: Cache TeX Live installation
       uses: actions/cache@v2
       id: cache-texlive
+      if: inputs.cache-enabled == 'true'
       with:
         path: ${{ inputs.installation-path }}
         key: ${{ inputs.cache-key }}-${{ hashFiles(inputs.profile-path, inputs.packages-path) }}
