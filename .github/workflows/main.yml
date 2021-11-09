@@ -18,7 +18,8 @@ jobs:
         id: current-time
         with:
           format: YYYY-ww
-      - uses: ./
+      - name: Setup TeX Live
+        uses: ./
         with:
           cache-key: texlive-${{ matrix.os }}-${{ steps.current-time.outputs.formattedTime }}
           packages-path: ${{ github.workspace }}/.github/texlive.packages

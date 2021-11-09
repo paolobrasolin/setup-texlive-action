@@ -1,5 +1,5 @@
-name: 'Setup TeX Live'
-description: 'GHA action to setup TeX Live'
+name: Setup TeX Live
+description: GHA action to setup TeX Live
 inputs:
   cache-enabled:
     default: true
@@ -32,10 +32,16 @@ runs:
         TEXLIVE_PROFILE_PATH: ${{ inputs.profile-path }}
       shell: powershell
       run: |
+        # Install TeX Live distribution (Windows)
+        ## Check into temporary folder
         Set-Location -Path ${{ runner.temp }}
+        ## Download installer
         Invoke-WebRequest http://mirror.ctan.org/systems/texlive/tlnet/install-tl.zip -OutFile install-tl.zip
+        ## Unpack installer
         Expand-Archive -Path install-tl.zip -DestinationPath .
+        ## Check into unpacked installer folder
         Set-Location -Path install-tl-20*
+        ## Run installer with given profile
         .\install-tl-windows.bat --portable --profile="${env:TEXLIVE_PROFILE_PATH}"
     - name: Install TeX Live distribution (Linux or macOS)
       if: runner.os != 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
@@ -44,10 +50,16 @@ runs:
         TEXLIVE_PROFILE_PATH: ${{ inputs.profile-path }}
       shell: bash
       run: |
+        # Install TeX Live distribution (Linux or macOS)
+        ## Check into temporary folder
         cd ${{ runner.temp }}
+        ## Download installer
         wget --quiet http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+        ## Unpack installer
         tar -xzf install-tl-unx.tar.gz
+        ## Check into unpacked installer folder
         cd install-tl-20*
+        ## Run installer with given profile
         ./install-tl --portable --profile="$TEXLIVE_PROFILE_PATH"
 
     - name: Update system paths (Windows)
@@ -56,18 +68,30 @@ runs:
         TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
       shell: powershell
       run: |
+        # Update system paths (Windows)
+        ## Get tlmgr path
         $TLMGR_PATH = Get-ChildItem -Path "${env:TEXLIVE_INSTALL_PREFIX}\bin\*\tlmgr.bat"
+        ## Get platform of installed distribution
         $PLATFORM = Invoke-Expression "$TLMGR_PATH -print-platform"
-        Write-Output "${env:TEXLIVE_INSTALL_PREFIX}\bin\${PLATFORM}" | Out-File -FilePath ${env:GITHUB_PATH} -Encoding utf8 -Append
+        ## Build binaries path
+        $BINARIES_PATH = "${env:TEXLIVE_INSTALL_PREFIX}\bin\${PLATFORM}"
+        ## Append binaries path to system paths
+        Write-Output "${BINARIES_PATH}" | Out-File -FilePath ${env:GITHUB_PATH} -Encoding utf8 -Append
     - name: Update system paths (Linux or macOS)
       if: runner.os != 'Windows'
       env:
         TEXLIVE_INSTALL_PREFIX: ${{ inputs.installation-path }}
       shell: bash
       run: |
+        # Update system paths (Linux or macOS)
+        ## Get tlmgr path
         TLMGR_PATH=$(ls "$TEXLIVE_INSTALL_PREFIX"/bin/*/tlmgr)
+        ## Get platform of installed distribution
         PLATFORM=$($TLMGR_PATH -print-platform)
-        echo "$TEXLIVE_INSTALL_PREFIX/bin/$PLATFORM" >> $GITHUB_PATH
+        ## Build binaries path
+        BINARIES_PATH="$TEXLIVE_INSTALL_PREFIX/bin/$PLATFORM"
+        ## Append binaries path to system paths
+        echo "$BINARIES_PATH" >> $GITHUB_PATH
 
     - name: Install TeX Live packages (Windows)
       if: runner.os == 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
@@ -75,7 +99,10 @@ runs:
         TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
       shell: powershell
       run: |
+        # Install TeX Live packages (Windows)
+        ## Read nonempty lines from packages file into an array
         [array] $TEXLIVE_PACKAGES = (Select-String -Pattern '^$' -NotMatch ${env:TEXLIVE_PACKAGES_PATH}).Line
+        ## Use tlmgr to install the packages
         tlmgr install $($TEXLIVE_PACKAGES -join " ")
     - name: Install TeX Live packages (Linux or macOS)
       if: runner.os != 'Windows' && steps.cache-texlive.outputs.cache-hit != 'true'
@@ -83,18 +110,27 @@ runs:
         TEXLIVE_PACKAGES_PATH: ${{ inputs.packages-path }}
       shell: bash
       run: |
+        # Install TeX Live packages (Linux or macOS)
+        ## Read nonempty lines from packages file into an array
         while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep --invert-match '^$' "$TEXLIVE_PACKAGES_PATH")
+        ## Use tlmgr to install the packages
         tlmgr install "${TEXLIVE_PACKAGES[@]}"
 
     - name: Update TeX Live distribution (Windows)
       if: runner.os == 'Windows' && steps.cache-texlive.outputs.cache-hit == 'true'
       shell: powershell
       run: |
+        # Update TeX Live distribution (Windows)
+        ## Update tlmgr
         tlmgr update --self
+        ## Update everything else
         tlmgr update --all
     - name: Update TeX Live distribution (Linux and macOS)
       if: runner.os != 'Windows' && steps.cache-texlive.outputs.cache-hit == 'true'
       shell: bash
       run: |
+        # Update TeX Live distribution (Linux and macOS)
+        ## Update tlmgr
         tlmgr update --self
+        ## Update everything else
         tlmgr update --all
