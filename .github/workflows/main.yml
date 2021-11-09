@@ -6,6 +6,7 @@ on:
 jobs:
   main:
     runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (cache ${{ matrix.cache && 'on' || 'off' }})
     strategy:
       fail-fast: false
       matrix:
