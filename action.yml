@@ -1,15 +1,29 @@
 name: Setup TeX Live
+author: Paolo Brasolin <paolo.brasolin@gmail.com>
 description: GHA action to setup TeX Live
+branding:
+  icon: book-open
+  color: blue
 inputs:
-  cache-enabled:
-    default: true
-  cache-key:
-    default: 'texlive'
-  packages-path:
-    default: ${{ github.action_path }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.packages 
   profile-path:
+    description: File path of a tlmgr profile. The default is a `scheme-infraonly` with no documentation or source files. You use it as a starting point, see https://github.com/paolobrasolin/setup-texlive-action/blob/main/texlive.profile
+    required: false
     default: ${{ github.action_path }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.profile 
+  packages-path:
+    description: File path of a package list (plain text, one per line). The default is an empty file.
+    required: false
+    default: ${{ github.action_path }}${{ runner.os == 'Windows' && '\' || '/'}}texlive.packages 
+  cache-key:
+    description: The unique key to use for cache storage and retrieval. The default is `texlive`.
+    required: false
+    default: 'texlive'
+  cache-enabled:
+    description: Option to disable caching. Default is `false`.
+    required: false
+    default: true
   installation-path:
+    description: Path where TeX Live will be installed. The default `texlive`, inside the runner's tool cache path.
+    required: false
     default: ${{ runner.tool_cache }}${{ runner.os == 'Windows' && '\' || '/'}}texlive
 outputs: {}
 runs:
