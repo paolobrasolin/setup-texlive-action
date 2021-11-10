@@ -1,0 +1,27 @@
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Generate timestamp for weekly cache invalidation
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-ww
+      - name: Setup TeX Live
+        uses: ./
+        with:
+          cache-key: texlive-ubuntu-latest-${{ steps.current-time.outputs.formattedTime }}
+          packages-path: ${{ github.workspace }}/.github/texlive.packages
+          profile-path: ${{ github.workspace }}/.github/texlive.profile
+      - name: Test tlmgr availability
+        run: tlmgr version
+      - name: Test run for latex
+        run: latex small2e
+      - name: Test run from pdflatex
+        run: pdflatex sample2e

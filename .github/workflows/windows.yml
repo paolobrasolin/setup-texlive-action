@@ -1,15 +1,10 @@
-name: CI
 on:
   push:
   schedule:
     - cron: '0 0 * * *'
 jobs:
   main:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
+    runs-on: windows-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -21,7 +16,7 @@ jobs:
       - name: Setup TeX Live
         uses: ./
         with:
-          cache-key: texlive-${{ matrix.os }}-${{ steps.current-time.outputs.formattedTime }}
+          cache-key: texlive-windows-latest-${{ steps.current-time.outputs.formattedTime }}
           packages-path: ${{ github.workspace }}/.github/texlive.packages
           profile-path: ${{ github.workspace }}/.github/texlive.profile
       - name: Test tlmgr availability
