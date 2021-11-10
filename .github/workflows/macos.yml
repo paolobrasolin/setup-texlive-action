@@ -1,3 +1,4 @@
+name: macos
 on:
   push:
   schedule:
