@@ -1,4 +1,4 @@
-# setup-texlive-action
+# Setup TeX Live
 
 [![Ubuntu CI tests status badge][ubuntu-ci-shield]][ubuntu-ci-url]
 [![macOS CI tests status badge][macos-ci-shield]][macos-ci-url]
@@ -15,7 +15,7 @@
 [macos-ci-shield]: https://img.shields.io/github/workflow/status/paolobrasolin/setup-texlive-action/macos/main?label=macOS&logo=apple&logoColor=white
 [windows-ci-shield]: https://img.shields.io/github/workflow/status/paolobrasolin/setup-texlive-action/windows/main?label=Windows&logo=windows&logoColor=white
 
-[release-url]: https://github.com/marketplace/actions/setup-texlive-action "Latest release"
+[release-url]: https://github.com/paolobrasolin/setup-texlive-action/releases "Latest release"
 [license-url]: https://github.com/paolobrasolin/setup-texlive-action/blob/main/LICENSE "License"
 
 [release-shield]: https://img.shields.io/github/v/release/paolobrasolin/setup-texlive-action?display_name=tag&sort=semver
