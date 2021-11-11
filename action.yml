@@ -115,7 +115,7 @@ runs:
       run: |
         # Install TeX Live packages (Windows)
         ## Read nonempty lines from packages file into an array
-        [array] $TEXLIVE_PACKAGES = (Select-String -Pattern '^$' -NotMatch ${env:TEXLIVE_PACKAGES_PATH}).Line
+        [array] $TEXLIVE_PACKAGES = (Select-String -Pattern '^(\s*#.*)?$' -NotMatch ${env:TEXLIVE_PACKAGES_PATH}).Line
         ## Use tlmgr to install the packages
         tlmgr install $($TEXLIVE_PACKAGES -join " ")
     - name: Install TeX Live packages (Linux or macOS)
@@ -126,7 +126,7 @@ runs:
       run: |
         # Install TeX Live packages (Linux or macOS)
         ## Read nonempty lines from packages file into an array
-        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep --invert-match '^$' "$TEXLIVE_PACKAGES_PATH")
+        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep --invert-match '^(\s*#.*)?$' "$TEXLIVE_PACKAGES_PATH")
         ## Use tlmgr to install the packages
         tlmgr install "${TEXLIVE_PACKAGES[@]}"
 
