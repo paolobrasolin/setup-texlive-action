@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2021-11-24
+
+### Fixed
+
+- Comments in package files are now correctly ignored.
+
 ## [1.0.1] - 2021-11-11
 
 ### Fixed
@@ -20,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release.
 
-[unreleased]: https://github.com/paolobrasolin/setup-texlive-action/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/paolobrasolin/setup-texlive-action/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/paolobrasolin/setup-texlive-action/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/paolobrasolin/setup-texlive-action/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/paolobrasolin/setup-texlive-action/releases/tag/v1.0.0

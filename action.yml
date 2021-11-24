@@ -126,7 +126,7 @@ runs:
       run: |
         # Install TeX Live packages (Linux or macOS)
         ## Read nonempty lines from packages file into an array
-        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep --invert-match '^(\s*#.*)?$' "$TEXLIVE_PACKAGES_PATH")
+        while IFS=\= read pkg; do TEXLIVE_PACKAGES+=($pkg); done < <(grep --invert-match --extended-regexp '^(\s*#.*)?$' "$TEXLIVE_PACKAGES_PATH")
         ## Use tlmgr to install the packages
         tlmgr install "${TEXLIVE_PACKAGES[@]}"
 
