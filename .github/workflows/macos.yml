@@ -8,9 +8,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Generate timestamp for weekly cache invalidation
-        uses: 1466587594/get-current-time@v2
+        uses: josStorer/get-current-time@v2
         id: current-time
         with:
           format: YYYY-ww
