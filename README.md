@@ -11,9 +11,9 @@
 [macos-ci-url]: https://github.com/paolobrasolin/setup-texlive-action/actions/workflows/macos.yml "macOS CI tests"
 [windows-ci-url]: https://github.com/paolobrasolin/setup-texlive-action/actions/workflows/windows.yml "Windows CI tests"
 
-[ubuntu-ci-shield]: https://img.shields.io/github/workflow/status/paolobrasolin/setup-texlive-action/ubuntu/main?label=Ubuntu&logo=ubuntu&logoColor=white
-[macos-ci-shield]: https://img.shields.io/github/workflow/status/paolobrasolin/setup-texlive-action/macos/main?label=macOS&logo=apple&logoColor=white
-[windows-ci-shield]: https://img.shields.io/github/workflow/status/paolobrasolin/setup-texlive-action/windows/main?label=Windows&logo=windows&logoColor=white
+[ubuntu-ci-shield]: https://img.shields.io/github/actions/workflow/status/paolobrasolin/setup-texlive-action/ubuntu.yml?branch=main&label=Ubuntu&logo=ubuntu&logoColor=white
+[macos-ci-shield]: https://img.shields.io/github/actions/workflow/status/paolobrasolin/setup-texlive-action/macos.yml?branch=main&label=macOS&logo=apple&logoColor=white
+[windows-ci-shield]: https://img.shields.io/github/actions/workflow/status/paolobrasolin/setup-texlive-action/windows.yml?branch=main&label=Windows&logo=windows&logoColor=white
 
 [release-url]: https://github.com/paolobrasolin/setup-texlive-action/releases "Latest release"
 [license-url]: https://github.com/paolobrasolin/setup-texlive-action/blob/main/LICENSE "License"
