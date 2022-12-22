@@ -10,10 +10,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Generate timestamp for weekly cache invalidation
-        uses: josStorer/get-current-time@v2
         id: current-time
-        with:
-          format: YYYY-ww
+        run: echo "formattedTime=$(date +%Y-%V)" >> $GITHUB_OUTPUT
       - name: Setup TeX Live
         uses: ./
         with:
